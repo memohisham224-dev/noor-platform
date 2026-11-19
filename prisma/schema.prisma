@@ -1,0 +1,111 @@
+generator client {
+  output   = "../src/generated/prisma"
+  provider = "prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  PARENT
+  ADMIN
+}
+
+enum LessonStatus {
+  DRAFT
+  PUBLISHED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id           String           @id @default(cuid())
+  name         String
+  email        String           @unique
+  password     String
+  role         Role             @default(STUDENT)
+  grade        String?
+  subject      String?
+  school       String?
+  experience   Int?
+  childName    String?
+  childGrade   String?
+  createdAt    DateTime         @default(now())
+  lessons      RecordedLesson[]
+  progress     Progress[]
+  payments     Payment[]
+  usedCodes    AccessCode[]     @relation("UsedCodes")
+  generatedCodes AccessCode[]   @relation("GeneratedCodes")
+}
+
+model RecordedLesson {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  subject     String
+  grade       String
+  price       Int          @default(0)
+  duration    Int          @default(0)
+  videoUrl    String
+  isFreeTrial Boolean      @default(false)
+  status      LessonStatus @default(DRAFT)
+  teacherId   String
+  teacher     User         @relation(fields: [teacherId], references: [id])
+  progress    Progress[]
+  payments    Payment[]
+  codes       AccessCode[]
+  createdAt   DateTime     @default(now())
+}
+
+model Progress {
+  id         String         @id @default(cuid())
+  userId     String
+  user       User           @relation(fields: [userId], references: [id])
+  lessonId   String
+  lesson     RecordedLesson @relation(fields: [lessonId], references: [id])
+  watchedSec Int            @default(0)
+  completed  Boolean        @default(false)
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([userId, lessonId])
+}
+
+model Payment {
+  id         String         @id @default(cuid())
+  userId     String
+  user       User           @relation(fields: [userId], references: [id])
+  lessonId   String
+  lesson     RecordedLesson @relation(fields: [lessonId], references: [id])
+  plan       String
+  amount     Int
+  method     String
+  code       String?
+  status     PaymentStatus  @default(PENDING)
+  receiptUrl String?
+  createdAt  DateTime       @default(now())
+}
+
+model AccessCode {
+  id          String         @id @default(cuid())
+  code        String         @unique
+  lessonId    String
+  lesson      RecordedLesson @relation(fields: [lessonId], references: [id])
+  price       Int
+  method      String         @default("CASH")
+  isUsed      Boolean        @default(false)
+  usedById    String?
+  usedBy      User?          @relation("UsedCodes", fields: [usedById], references: [id])
+  generatedBy String?
+  generator   User?          @relation("GeneratedCodes", fields: [generatedBy], references: [id])
+  usedAt      DateTime?
+  createdAt   DateTime       @default(now())
+}

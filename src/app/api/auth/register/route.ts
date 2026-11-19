@@ -1,0 +1,4 @@
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
+export async function POST(req:Request){ try{ const b=await req.json(); if(!b.email||!b.password||b.password.length<6) return NextResponse.json({error:'الايميل والباسورد مطلوبين - الباسورد 6 حروف على الأقل'},{status:400}); const ex=await prisma.user.findUnique({where:{email:b.email}}); if(ex) return NextResponse.json({error:'الايميل ده متسجل قبل كده'},{status:400}); const hash=await bcrypt.hash(b.password,10); const u=await prisma.user.create({data:{name:b.name||'مستخدم',email:b.email,password:hash,role:b.role||'STUDENT',subject:b.subject,grade:b.grade,school:b.school,experience:b.experience,childName:b.childName,childGrade:b.childGrade}}); return NextResponse.json({ok:true,id:u.id,role:u.role}) }catch(e){ return NextResponse.json({error:'حصل خطأ'},{status:500}) } }

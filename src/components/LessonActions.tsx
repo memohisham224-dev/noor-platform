@@ -1,0 +1,3 @@
+'use client'
+import {useState} from 'react'
+export function LessonActions({lessonId}:{lessonId:string}){ const [liked,setLiked]=useState(false); const [saved,setSaved]=useState(false); return <div className='flex gap-2'><button onClick={()=>setLiked(!liked)} className={`border px-4 py-2.5 rounded-xl text-sm font-bold ${liked?'bg-red-50 border-red-200 text-red-600':''}`}>{liked?'❤️ عجبني':'🤍 عجبني'}</button><button onClick={()=>setSaved(!saved)} className={`border px-4 py-2.5 rounded-xl text-sm font-bold ${saved?'bg-amber-50 border-amber-200':''}`}>{saved?'🔖 محفوظ':'📌 احفظه بعدين'}</button></div> }

@@ -1,0 +1,3 @@
+import Link from 'next/link'
+import { prisma } from '@/lib/prisma'
+export default async function Teachers(){ const t=await prisma.user.findMany({where:{role:'TEACHER'}}); return <div dir='rtl' className='max-w-6xl mx-auto p-6'><h1 className='text-2xl font-bold'>👨‍🏫 المدرسين</h1><div className='grid md:grid-cols-3 gap-4 mt-4'>{t.map(x=><Link key={x.id} href={`/teachers/${x.id}`} className='bg-white border rounded-2xl p-5'><p className='font-bold'>{x.name}</p><p className='text-sm text-gray-500'>{x.subject} - {x.grade}</p><p className='text-amber-500 text-sm mt-1'>★★★★★ 4.9</p></Link>)}{t.length===0&&<p className='text-gray-500'>لسه مفيش مدرسين</p>}</div></div> }
